@@ -1,0 +1,162 @@
+﻿@model BytologyTask.Models.blogPosts
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+ 
+<div>
+    <h1 class="mt-4">
+        @Model.title</h1>
+        <hr />
+
+        <p>
+            Posted on  @Html.DisplayFor(model => model.date)
+        </p>
+
+
+        <hr />
+
+        <p>
+            @Html.DisplayFor(model => model.title)
+        </p>
+
+        <hr />
+        <p>
+            <img src="@Model.image" class="img-fluid rounded" />
+        </p>
+
+        <hr />
+
+        <p>
+            @Html.Raw(Model.htmlContent)
+        </p>
+
+        <hr />
+</div>
+
+<!-- Blog post comment form -->
+@using (Html.BeginForm("submitComment", "Blog", FormMethod.Post))
+{
+<div class="card my-4">
+    <h5 class="card-header">Leave a Comment:</h5>
+    <div class="card-body">
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="Name">Name</label>
+                @Html.TextBox("name", "", new { @class = "form-control",@required ="required" })
+            </div>
+            <div class="form-group col-md-6">
+                <label for="EmailAddress">Email Address</label>
+                @Html.TextBox("emailAddress", "", new { @class = "form-control", @required = "required" })
+            </div>
+        </div>
+        @Html.Hidden("postId", Model.id)
+        <div class="form-group">
+            <label for="Message">Message</label>
+            @Html.TextArea("message", "", new { @class = "form-control", @required = "required" })
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+    </div>
+</div>
+}
+<div>
+    @if (Model.Comments != null)
+    {
+        foreach (BytologyTask.Models.Comment item in Model.Comments)
+        {
+            <div class="media mb-4">
+                <img class="d-flex mr-3 rounded-circle user-avatar" src="https://eu.ui-avatars.com/api/?name=Steven+Barker" alt="Steven Barker">
+                <div class="media-body">
+                    <h5 class="mt-0">@item.name <small><em>@item.date</em></small></h5>
+                    @item.message
+                </div>
+            </div>
+
+            if (item.replies != null)
+            {
+                <hr />
+                <p>Replies : </p>
+                <hr />
+                foreach (BytologyTask.Models.Replies reply in item.replies)
+                {
+                    <div class="media mb-4">
+                        <img class="d-flex mr-3 rounded-circle user-avatar" src="https://eu.ui-avatars.com/api/?name=Steven+Barker" alt="Steven Barker">
+                        <div class="media-body">
+                            <h5 class="mt-0">@reply.name <small><em>@reply.date</em></small></h5>
+                            @reply.message
+                        </div>
+                    </div>
+                }
+            }
+
+            using (Html.BeginForm("submitReply", "Blog", FormMethod.Post))
+            {
+                <div class="card my-4">
+                    <h5 class="card-header">Reply To Comment:</h5>
+                    <div class="card-body">
+
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label for="Name">Name</label>
+                                @Html.TextBox("replyname", "", new { @class = "form-control", @required = "required" })
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="EmailAddress">Email Address</label>
+                                @Html.TextBox("replyemailAddress", "", new { @class = "form-control", @required = "required" })
+                            </div>
+                        </div>
+                        @Html.Hidden("commentId", item.Id)
+                        @Html.Hidden("commentDate", item.date)
+                        @Html.Hidden("postId", Model.id)
+                        <div class="form-group">
+                            <label for="Message">Message</label>
+                            @Html.TextArea("replymessage", "", new { @class = "form-control", @required = "required" })
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+
+                    </div>
+                </div>
+            }
+
+
+        }
+    }
+</div>
+
+
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
+
+@section Scripts {
+    <script>
+        function submitComment() {
+            var dataType = 'application/json; charset=utf-8';
+            debugger;
+            var data = {
+                postId: 1,
+                name: 'Andrew',
+                emailAddress: 'Lock',
+                message: 'Hellooo'
+            }
+
+            console.log('Submitting form...');
+            $.ajax({
+                type: 'POST',
+                url: '/Blog/submitComment',
+                dataType: 'json',
+                contentType: dataType,
+                data: data,
+                success: function (result) {
+                    console.log('Data received: ');
+                    console.log(result);
+                }
+            });
+        }
+    </script>
+}
